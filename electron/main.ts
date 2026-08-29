@@ -23,8 +23,6 @@ const MAX_ARCHIVE_IMAGE_PIXELS = (8 * 1024 * 1024 * 1024) / 4;
 const MAX_BOOK_BYTES = 1024 * 1024 * 1024;
 const MAX_BUFFERED_BOOK_BYTES = 512 * 1024 * 1024;
 const MAX_TEXT_BYTES = 64 * 1024 * 1024;
-const MIN_ZOOM_FACTOR = 0.5;
-const MAX_ZOOM_FACTOR = 3;
 const SUPPORTED_BOOK = /\.(cbz|epub|pdf|txt)$/i;
 
 interface PageMeta {
@@ -58,7 +56,12 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 
-if (process.platform === "linux") app.commandLine.appendSwitch("ozone-platform-hint", "auto");
+app.commandLine.appendSwitch("force-color-profile", "srgb");
+app.commandLine.appendSwitch("force-raster-color-profile", "srgb");
+if (process.platform === "linux") {
+  app.commandLine.appendSwitch("disable-features", "WaylandWpColorManagerV1");
+  app.commandLine.appendSwitch("ozone-platform-hint", "auto");
+}
 
 let mainWindow: BrowserWindow | null = null;
 let activeBook: ActiveBook | null = null;
@@ -178,13 +181,6 @@ function registerIpc(): void {
   ipcMain.handle("reader:toggle-fullscreen", (event) => {
     assertTrustedIpc(event);
     if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen());
-  });
-  ipcMain.handle("reader:set-zoom-factor", (event, zoomFactor: unknown) => {
-    assertTrustedIpc(event);
-    if (typeof zoomFactor !== "number" || !Number.isFinite(zoomFactor) || zoomFactor < MIN_ZOOM_FACTOR || zoomFactor > MAX_ZOOM_FACTOR) {
-      throw new RangeError("Zoom factor is outside the supported range.");
-    }
-    mainWindow?.webContents.setZoomFactor(zoomFactor);
   });
   ipcMain.on("reader:refresh-rate", (event, rate: unknown) => {
     if (!isTrustedIpc(event)) return;

@@ -13,6 +13,11 @@ export function clampZoomFactor(value: number): number {
   return Math.min(3, Math.max(0.5, Math.round(value * 10) / 10));
 }
 
+export function zoomedScrollOffset(scrollOffset: number, anchorOffset: number, previousZoom: number, nextZoom: number): number {
+  if (![scrollOffset, anchorOffset, previousZoom, nextZoom].every(Number.isFinite) || previousZoom <= 0 || nextZoom <= 0) return scrollOffset;
+  return Math.max(0, (scrollOffset + anchorOffset) * (nextZoom / previousZoom) - anchorOffset);
+}
+
 export function normalizeTextWidth(value: unknown): number | null {
   return typeof value === "number" && TEXT_WIDTHS.includes(value as typeof TEXT_WIDTHS[number]) ? value : null;
 }

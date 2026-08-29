@@ -22,6 +22,7 @@ import {
   saveBookState,
   savePreferences,
   scrollRatio,
+  zoomedScrollOffset,
 } from "./state";
 import type { BookManifest, ReaderPreferences, StoredBookState } from "./types";
 
@@ -61,8 +62,8 @@ let saveTimer: number | undefined;
 let toolbarTimer: number | undefined;
 let messageTimer: number | undefined;
 let openGeneration = 0;
-let appliedZoomFactor: number | null = null;
 let lastZoomWheelAt = Number.NEGATIVE_INFINITY;
+let panState: { pointerId: number; x: number; y: number; scrollX: number; scrollY: number } | null = null;
 
 applyPreferences();
 bindControls();
@@ -93,6 +94,10 @@ function bindControls(): void {
   window.addEventListener("resize", handleWindowResize, { passive: true });
   window.addEventListener("pointermove", handlePointerMove, { passive: true });
   window.addEventListener("wheel", handleWheel, { passive: false });
+  reader.addEventListener("pointerdown", startReaderPan);
+  reader.addEventListener("pointermove", moveReaderPan);
+  reader.addEventListener("pointerup", endReaderPan);
+  reader.addEventListener("pointercancel", endReaderPan);
   toolbar.addEventListener("pointerenter", () => window.clearTimeout(toolbarTimer));
   toolbar.addEventListener("pointerleave", scheduleToolbarHide);
   toolbarRevealZone.addEventListener("pointerenter", showToolbar);
@@ -253,7 +258,7 @@ async function renderCbz(book: BookManifest, state: StoredBookState | null): Pro
   setCbzPageCount(requestedPage);
   requestAnimationFrame(() => {
     const shell = pageShell(requestedPage);
-    if (shell) window.scrollTo({ top: shell.offsetTop + shell.offsetHeight * requestedOffset });
+    if (shell) window.scrollTo({ top: renderedDocumentTop(shell) + renderedHeight(shell) * requestedOffset });
     updateCbzViewport();
   });
 }
@@ -267,12 +272,13 @@ function currentCbzPosition(): { index: number; offset: number } {
   const targetY = window.scrollY + 1;
   let current = shells[0];
   for (const shell of shells) {
-    if (shell.offsetTop > targetY) break;
+    if (renderedDocumentTop(shell) > targetY) break;
     current = shell;
   }
   if (!current) return { index: 0, offset: 0 };
   const index = Number(current.dataset.pageIndex ?? 0);
-  const offset = current.offsetHeight ? (targetY - current.offsetTop) / current.offsetHeight : 0;
+  const height = renderedHeight(current);
+  const offset = height ? (targetY - renderedDocumentTop(current)) / height : 0;
   return { index, offset: Math.min(1, Math.max(0, offset)) };
 }
 
@@ -326,7 +332,7 @@ async function renderEpub(book: BookManifest, state: StoredBookState | null): Pr
   setEpubSectionCount(requestedSection);
   requestAnimationFrame(() => {
     const shell = epubSectionShell(requestedSection);
-    if (shell) window.scrollTo({ top: shell.offsetTop + shell.offsetHeight * requestedOffset });
+    if (shell) window.scrollTo({ top: renderedDocumentTop(shell) + renderedHeight(shell) * requestedOffset });
     updateEpubViewport();
   });
 }
@@ -429,12 +435,13 @@ function currentEpubPosition(): { index: number; offset: number } {
   const targetY = window.scrollY + 1;
   let current = shells[0];
   for (const shell of shells) {
-    if (shell.offsetTop > targetY) break;
+    if (renderedDocumentTop(shell) > targetY) break;
     current = shell;
   }
   if (!current) return { index: 0, offset: 0 };
   const index = Number(current.dataset.sectionIndex ?? 0);
-  const offset = current.offsetHeight ? (targetY - current.offsetTop) / current.offsetHeight : 0;
+  const height = renderedHeight(current);
+  const offset = height ? (targetY - renderedDocumentTop(current)) / height : 0;
   return { index, offset: Math.min(1, Math.max(0, offset)) };
 }
 
@@ -513,7 +520,7 @@ async function renderPdf(book: BookManifest, state: StoredBookState | null): Pro
   setPdfPageCount(requestedPage);
   requestAnimationFrame(() => {
     const shell = pdfPageShell(requestedPage);
-    if (shell) window.scrollTo({ top: shell.offsetTop + shell.offsetHeight * requestedOffset });
+    if (shell) window.scrollTo({ top: renderedDocumentTop(shell) + renderedHeight(shell) * requestedOffset });
     updatePdfViewport();
   });
 }
@@ -527,18 +534,27 @@ function currentPdfPosition(): { index: number; offset: number } {
   const targetY = window.scrollY + 1;
   let current = shells[0];
   for (const shell of shells) {
-    if (shell.offsetTop > targetY) break;
+    if (renderedDocumentTop(shell) > targetY) break;
     current = shell;
   }
   if (!current) return { index: 0, offset: 0 };
   const index = Number(current.dataset.pageIndex ?? 0);
-  const offset = current.offsetHeight ? (targetY - current.offsetTop) / current.offsetHeight : 0;
+  const height = renderedHeight(current);
+  const offset = height ? (targetY - renderedDocumentTop(current)) / height : 0;
   return { index, offset: Math.min(1, Math.max(0, offset)) };
 }
 
 function updatePdfViewport(): void {
   if (currentBook?.kind !== "pdf") return;
   setPdfPageCount(currentPdfPosition().index);
+}
+
+function renderedDocumentTop(element: HTMLElement): number {
+  return window.scrollY + element.getBoundingClientRect().top;
+}
+
+function renderedHeight(element: HTMLElement): number {
+  return element.getBoundingClientRect().height;
 }
 
 function cleanupCurrentBook(): void {
@@ -628,16 +644,20 @@ function cycleTextWidth(): void {
   applyPreferences();
 }
 
-function changeZoom(delta: number): void {
-  preferences.zoomFactor = clampZoomFactor(preferences.zoomFactor + delta);
+function changeZoom(delta: number, anchorX = window.innerWidth / 2, anchorY = window.innerHeight / 2): void {
+  const previousZoom = preferences.zoomFactor;
+  const nextZoom = clampZoomFactor(previousZoom + delta);
+  if (nextZoom === previousZoom) return;
+  const nextScrollX = zoomedScrollOffset(window.scrollX, anchorX, previousZoom, nextZoom);
+  const nextScrollY = zoomedScrollOffset(window.scrollY, anchorY, previousZoom, nextZoom);
+  preferences.zoomFactor = nextZoom;
   savePreferences(preferences);
   applyPreferences();
+  requestAnimationFrame(() => scrollInstantly(nextScrollX, nextScrollY));
 }
 
 function resetZoom(): void {
-  preferences.zoomFactor = 1;
-  savePreferences(preferences);
-  applyPreferences();
+  changeZoom(1 - preferences.zoomFactor);
 }
 
 function togglePdfColors(): void {
@@ -651,6 +671,8 @@ function applyPreferences(): void {
   const textWidth = preferences.textWidth ?? STANDARD_TEXT_WIDTH;
   document.documentElement.style.setProperty("--text-size", `${fontSize}px`);
   document.documentElement.style.setProperty("--text-width", `${textWidth}px`);
+  document.documentElement.style.setProperty("--reader-zoom", String(preferences.zoomFactor));
+  document.body.classList.toggle("is-reader-zoomed", preferences.zoomFactor > 1);
   fontLabel.textContent = preferences.fontSize === null && currentBook?.kind === "epub" ? "Book font" : `${fontSize} px`;
   widthButton.textContent = preferences.textWidth === null && currentBook?.kind === "epub" ? "Book width" : `Width ${textWidth}`;
   zoomResetButton.textContent = `Zoom ${Math.round(preferences.zoomFactor * 100)}%`;
@@ -659,15 +681,6 @@ function applyPreferences(): void {
   pdfColorsButton.textContent = preferences.pdfDark ? "PDF: dark" : "PDF: light";
   pdfColorsButton.setAttribute("aria-pressed", String(preferences.pdfDark));
   reader.classList.toggle("pdf-dark", currentBook?.kind === "pdf" && preferences.pdfDark);
-  if (appliedZoomFactor !== preferences.zoomFactor) {
-    appliedZoomFactor = preferences.zoomFactor;
-    void window.readerApi.setZoomFactor(preferences.zoomFactor).then(() => {
-      requestAnimationFrame(handleWindowResize);
-    }, (error: unknown) => {
-      appliedZoomFactor = null;
-      showMessage(error instanceof Error ? error.message : String(error), 6000);
-    });
-  }
   if (currentBook?.kind === "epub") refreshEpubFrames();
   if (currentBook?.kind === "txt") requestAnimationFrame(setTextPageCount);
 }
@@ -699,7 +712,37 @@ function handleWheel(event: WheelEvent): void {
   showToolbar();
   if (event.timeStamp - lastZoomWheelAt < 80) return;
   lastZoomWheelAt = event.timeStamp;
-  changeZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+  changeZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP, event.clientX, event.clientY);
+}
+
+function startReaderPan(event: PointerEvent): void {
+  if (event.button !== 0 || preferences.zoomFactor <= 1 || !currentBook) return;
+  if ((event.target as Element).closest("a, button, input, select, textarea")) return;
+  event.preventDefault();
+  panState = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, scrollX: window.scrollX, scrollY: window.scrollY };
+  reader.setPointerCapture(event.pointerId);
+  document.documentElement.classList.add("is-reader-panning");
+  document.body.classList.add("is-reader-panning");
+}
+
+function moveReaderPan(event: PointerEvent): void {
+  if (!panState || event.pointerId !== panState.pointerId) return;
+  event.preventDefault();
+  window.scrollTo(panState.scrollX - (event.clientX - panState.x), panState.scrollY - (event.clientY - panState.y));
+}
+
+function endReaderPan(event: PointerEvent): void {
+  if (!panState || event.pointerId !== panState.pointerId) return;
+  if (reader.hasPointerCapture(event.pointerId)) reader.releasePointerCapture(event.pointerId);
+  panState = null;
+  document.documentElement.classList.remove("is-reader-panning");
+  document.body.classList.remove("is-reader-panning");
+}
+
+function scrollInstantly(left: number, top: number): void {
+  document.documentElement.classList.add("is-reader-panning");
+  window.scrollTo(left, top);
+  requestAnimationFrame(() => document.documentElement.classList.remove("is-reader-panning"));
 }
 
 function showToolbar(): void {

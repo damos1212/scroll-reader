@@ -5,6 +5,7 @@
   font-synthesis: none;
   --text-size: 20px;
   --text-width: 760px;
+  --reader-zoom: 1;
 }
 
 * {
@@ -163,6 +164,20 @@ button:focus-visible {
 
 .reader {
   min-height: 100vh;
+  zoom: var(--reader-zoom);
+}
+
+body.is-reader-zoomed .reader {
+  cursor: grab;
+}
+
+body.is-reader-panning .reader {
+  cursor: grabbing;
+  user-select: none;
+}
+
+html.is-reader-panning {
+  scroll-behavior: auto;
 }
 
 .reader.cbz-reader {
@@ -216,6 +231,7 @@ button:focus-visible {
   width: 100%;
   height: auto;
   object-fit: contain;
+  -webkit-user-drag: none;
 }
 
 .page-shell.is-loaded {

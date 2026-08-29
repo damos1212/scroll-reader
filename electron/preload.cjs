@@ -12,7 +12,6 @@ contextBridge.exposeInMainWorld("readerApi", {
     return () => ipcRenderer.removeListener("reader:open-book", listener);
   },
   toggleFullscreen: () => ipcRenderer.invoke("reader:toggle-fullscreen"),
-  setZoomFactor: (zoomFactor) => ipcRenderer.invoke("reader:set-zoom-factor", zoomFactor),
   reportRefreshRate: (rate) => ipcRenderer.send("reader:refresh-rate", rate),
   reportBookOpened: (kind, title) => ipcRenderer.send("reader:book-opened", kind, title),
   reportError: (detail) => ipcRenderer.send("reader:renderer-error", detail),

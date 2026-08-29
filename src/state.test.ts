@@ -10,6 +10,7 @@ import {
   nextTextWidth,
   saveBookState,
   scrollRatio,
+  zoomedScrollOffset,
 } from "./state";
 
 class MemoryStorage implements Storage {
@@ -34,6 +35,12 @@ describe("reader state", () => {
     expect(clampZoomFactor(1.26)).toBe(1.3);
     expect(clampZoomFactor(4)).toBe(3);
     expect(clampZoomFactor(Number.NaN)).toBe(1);
+  });
+
+  it("keeps the pointer anchor stable while zooming", () => {
+    expect(zoomedScrollOffset(100, 50, 1, 2)).toBe(250);
+    expect(zoomedScrollOffset(250, 50, 2, 1)).toBe(100);
+    expect(zoomedScrollOffset(100, 50, 0, 2)).toBe(100);
   });
 
   it("cycles the supported text widths", () => {

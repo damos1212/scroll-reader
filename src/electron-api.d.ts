@@ -8,7 +8,6 @@ interface ReaderApi {
   startupBook(): Promise<BookManifest | null>;
   onOpenBook(callback: (manifest: BookManifest) => void): () => void;
   toggleFullscreen(): Promise<void>;
-  setZoomFactor(zoomFactor: number): Promise<void>;
   reportRefreshRate(rate: number): void;
   reportBookOpened(kind: string, title: string): void;
   reportError(detail: string): void;
