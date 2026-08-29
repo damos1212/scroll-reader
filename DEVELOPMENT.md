@@ -50,7 +50,7 @@ The main process rejects:
 - EPUB entries larger than 64 MiB or EPUB archives with more than 512 MiB aggregate expanded data;
 - ZIP entries whose expanded-to-compressed ratio exceeds 100:1.
 
-The renderer additionally limits EPUB sections and markup, decoded CBZ and EPUB image pixels, PDF page count, PDF geometry, per-page canvas pixels, and retained PDF canvas pixels.
+The main process and renderer allow up to 8 GiB of aggregate decoded CBZ or EPUB image data, calculated as four RGBA bytes per pixel. The renderer also limits EPUB sections and markup, PDF page count, PDF geometry, per-page canvas pixels, and retained PDF canvas pixels.
 
 ## Generated files
 
