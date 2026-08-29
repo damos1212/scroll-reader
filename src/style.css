@@ -163,7 +163,9 @@ button:focus-visible {
 }
 
 .reader {
+  width: 100vw;
   min-height: 100vh;
+  margin-inline: auto;
   zoom: var(--reader-zoom);
 }
 
@@ -180,16 +182,8 @@ html.is-reader-panning {
   scroll-behavior: auto;
 }
 
-.reader.cbz-reader {
-  width: 100%;
-}
-
 .reader.cbz-reader.is-preloading {
   visibility: hidden;
-}
-
-.reader.pdf-reader {
-  width: 100%;
 }
 
 .reader.pdf-reader.is-preloading {
@@ -255,7 +249,6 @@ html.is-reader-panning {
 }
 
 .epub-reader {
-  width: 100%;
   min-height: 100vh;
   background: #000;
 }
