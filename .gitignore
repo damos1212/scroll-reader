@@ -27,3 +27,8 @@
 Thumbs.db
 .idea/
 .vscode/
+
+# Local Arch package builds
+/packaging/aur/pkg/
+/packaging/aur/src/
+/packaging/aur/*.pkg.tar.*

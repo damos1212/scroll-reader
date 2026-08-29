@@ -1,0 +1,49 @@
+# Maintainer: damos1212 <353997+damos1212 at users dot noreply dot github dot com>
+
+pkgname=scroll-reader-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Minimal continuous-scroll reader for CBZ, EPUB, PDF, and TXT files (prebuilt)'
+arch=('x86_64')
+url='https://github.com/damos1212/scroll-reader'
+license=('MIT')
+depends=(
+  'alsa-lib'
+  'gtk3'
+  'nss'
+)
+provides=("scroll-reader=${pkgver}")
+conflicts=('scroll-reader')
+options=('!strip' '!debug')
+source=(
+  "scroll-reader-${pkgver}-linux-x64.tar.gz::${url}/releases/download/v${pkgver}/scroll-reader-${pkgver}-linux-x64.tar.gz"
+  "scroll-reader.desktop::https://raw.githubusercontent.com/damos1212/scroll-reader/v${pkgver}/scroll-reader.desktop"
+  "scroll-reader.png::https://raw.githubusercontent.com/damos1212/scroll-reader/v${pkgver}/packaging/icon.png"
+  "LICENSE::https://raw.githubusercontent.com/damos1212/scroll-reader/v${pkgver}/LICENSE"
+)
+sha256sums=(
+  '731a311c8b614d0f4399f7f2999a703f81946d40b8a566642f30c5e815d115c9'
+  'd8e6983d706b97e7c5bf0a9fb0a01df79f2de47fc75f7f9f13c9b3fc6c027848'
+  'c074bb926a2cfb39c6796905dfc3111a9055afb067a51236bb5b27225811a423'
+  'afb80712f3ddbdc0683520b28d751463b06fdc2630943d48ffe393f6cbc7a6f3'
+)
+
+package() {
+  install -d "${pkgdir}/opt/scroll-reader"
+  cp -a --no-preserve=ownership \
+    "${srcdir}/scroll-reader-${pkgver}-linux-x64/." \
+    "${pkgdir}/opt/scroll-reader/"
+
+  chmod 4755 "${pkgdir}/opt/scroll-reader/chrome-sandbox"
+
+  install -d "${pkgdir}/usr/bin"
+  ln -s '/opt/scroll-reader/scroll-reader' \
+    "${pkgdir}/usr/bin/scroll-reader"
+
+  install -Dm644 "${srcdir}/scroll-reader.desktop" \
+    "${pkgdir}/usr/share/applications/scroll-reader.desktop"
+  install -Dm644 "${srcdir}/scroll-reader.png" \
+    "${pkgdir}/usr/share/icons/hicolor/1024x1024/apps/scroll-reader.png"
+  install -Dm644 "${srcdir}/LICENSE" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

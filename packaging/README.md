@@ -4,4 +4,4 @@ This directory is the only source for release-package artwork. Do not copy image
 
 `icon.png` is the maintainer-approved generated application icon used by Electron Builder for Linux, macOS, and Windows packages. Verify its platform-specific conversion in the native release jobs.
 
-Add the future AUR recipe here only after the public repository URL and first stable GitHub release exist.
+The `aur/` directory contains the source recipe for the `scroll-reader-bin` AUR package. Keep its `PKGBUILD` and generated `.SRCINFO` synchronized with each stable GitHub release. The recipe installs only the published Linux archive, this approved icon, the desktop entry, and the MIT license.
