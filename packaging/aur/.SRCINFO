@@ -1,6 +1,6 @@
 pkgbase = scroll-reader-bin
 	pkgdesc = Minimal continuous-scroll reader for CBZ, EPUB, PDF, and TXT files (prebuilt)
-	pkgver = 0.2.1
+	pkgver = 0.2.2
 	pkgrel = 1
 	url = https://github.com/damos1212/scroll-reader
 	arch = x86_64
@@ -8,15 +8,15 @@ pkgbase = scroll-reader-bin
 	depends = alsa-lib
 	depends = gtk3
 	depends = nss
-	provides = scroll-reader=0.2.1
+	provides = scroll-reader=0.2.2
 	conflicts = scroll-reader
 	options = !strip
 	options = !debug
-	source = scroll-reader-0.2.1-linux-x64.tar.gz::https://github.com/damos1212/scroll-reader/releases/download/v0.2.1/scroll-reader-0.2.1-linux-x64.tar.gz
-	source = scroll-reader.desktop::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.1/scroll-reader.desktop
-	source = scroll-reader.png::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.1/packaging/icon.png
-	source = LICENSE::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.1/LICENSE
-	sha256sums = 7f46a190b1bf89d657b8e743387d3a30857e588854229a94cecc7fcb639755df
+	source = scroll-reader-0.2.2-linux-x64.tar.gz::https://github.com/damos1212/scroll-reader/releases/download/v0.2.2/scroll-reader-0.2.2-linux-x64.tar.gz
+	source = scroll-reader.desktop::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.2/scroll-reader.desktop
+	source = scroll-reader.png::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.2/packaging/icon.png
+	source = LICENSE::https://raw.githubusercontent.com/damos1212/scroll-reader/v0.2.2/LICENSE
+	sha256sums = f80f95248b76905f66e8bd23356d858890d5fb2f346811a17f7d826e25ad20ac
 	sha256sums = d8e6983d706b97e7c5bf0a9fb0a01df79f2de47fc75f7f9f13c9b3fc6c027848
 	sha256sums = c074bb926a2cfb39c6796905dfc3111a9055afb067a51236bb5b27225811a423
 	sha256sums = afb80712f3ddbdc0683520b28d751463b06fdc2630943d48ffe393f6cbc7a6f3
