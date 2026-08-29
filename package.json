@@ -1,0 +1,136 @@
+{
+  "name": "scroll-reader",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A minimal continuous-scroll manga and light novel reader",
+  "author": "Scroll Reader contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damos1212/scroll-reader.git"
+  },
+  "homepage": "https://github.com/damos1212/scroll-reader#readme",
+  "bugs": {
+    "url": "https://github.com/damos1212/scroll-reader/issues"
+  },
+  "desktopName": "scroll-reader.desktop",
+  "keywords": ["cbz", "electron", "epub", "linux", "pdf", "reader"],
+  "type": "module",
+  "packageManager": "npm@11.19.0",
+  "allowScripts": {
+    "electron@44.0.0": true,
+    "esbuild@0.28.2": true,
+    "core-js": false,
+    "electron-winstaller": false,
+    "es5-ext": false
+  },
+  "overrides": {
+    "@xmldom/xmldom": "^0.8.15"
+  },
+  "engines": {
+    "node": ">=26.7.0",
+    "npm": ">=11.19.0"
+  },
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "build:renderer": "tsc && vite build",
+    "build:main": "tsc -p electron/tsconfig.json",
+    "build": "npm run build:renderer && npm run build:main",
+    "check": "npm run test && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify:epub": "node scripts/verify-epub.mjs",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --linux dir --publish never",
+    "package:linux": "npm run build && electron-builder --linux AppImage tar.gz --x64 --publish never",
+    "package:mac": "npm run build && electron-builder --mac dmg zip --universal --publish never",
+    "package:windows": "npm run build && electron-builder --windows nsis portable --x64 --publish never"
+  },
+  "dependencies": {
+    "epubjs": "^0.3.93",
+    "yauzl": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/yauzl": "^2.10.3",
+    "@xmldom/xmldom": "^0.8.15",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0",
+    "pdfjs-dist": "^6.2.108",
+    "typescript": "^5.7.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.0.0"
+  },
+  "build": {
+    "appId": "io.damos.scroll-reader",
+    "productName": "Scroll Reader",
+    "artifactName": "scroll-reader-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "buildResources": "packaging",
+      "output": "release"
+    },
+    "files": ["dist/**/*", "dist-electron/**/*", "electron/preload.cjs", "LICENSE", "package.json"],
+    "fileAssociations": [
+      {
+        "ext": "cbz",
+        "name": "Comic book archive",
+        "description": "CBZ comic book archive",
+        "mimeType": "application/vnd.comicbook+zip",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": "epub",
+        "name": "EPUB publication",
+        "description": "EPUB publication",
+        "mimeType": "application/epub+zip",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": "pdf",
+        "name": "PDF document",
+        "description": "PDF document",
+        "mimeType": "application/pdf",
+        "role": "Viewer",
+        "rank": "Alternate"
+      },
+      {
+        "ext": "txt",
+        "name": "Text document",
+        "description": "Plain text document",
+        "mimeType": "text/plain",
+        "role": "Viewer",
+        "rank": "Alternate"
+      }
+    ],
+    "linux": {
+      "target": ["AppImage", "tar.gz"],
+      "category": "Graphics;Viewer",
+      "icon": "packaging/icon.png",
+      "syncDesktopName": true,
+      "executableArgs": ["%f"]
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.utilities",
+      "identity": null,
+      "hardenedRuntime": false,
+      "icon": "packaging/icon.png"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "packaging/icon.png",
+      "signExecutable": false
+    },
+    "nsis": {
+      "artifactName": "scroll-reader-${version}-windows-${arch}-setup.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "portable": {
+      "artifactName": "scroll-reader-${version}-windows-${arch}-portable.${ext}"
+    }
+  }
+}

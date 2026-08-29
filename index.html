@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' scroll-reader-book:; img-src 'self' scroll-reader-book: blob:; font-src 'self' blob: data:; style-src 'self' 'unsafe-inline' blob: data:; worker-src 'self' blob:; frame-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <title>Scroll Reader</title>
+  </head>
+  <body>
+    <main id="app">
+      <header id="toolbar" class="toolbar" aria-label="Reader controls">
+        <button id="open-book" type="button" title="Open book (Ctrl+O)">Open</button>
+        <div class="control-group" aria-label="Text size">
+          <button id="font-down" type="button" title="Smaller text (-)">A−</button>
+          <button id="font-label" type="button" title="Reset to the book's font and size" aria-live="polite">22 px</button>
+          <button id="font-up" type="button" title="Larger text (+)">A+</button>
+        </div>
+        <button id="width-toggle" type="button" title="Cycle book and custom text widths">Width 760</button>
+        <button id="pdf-colors" type="button" title="Toggle PDF page colors" hidden>PDF: light</button>
+        <span id="book-title" class="book-title">Scroll Reader</span>
+        <span id="progress" class="progress">—</span>
+        <span id="refresh-rate" class="refresh-rate" hidden></span>
+        <button id="fullscreen" type="button" title="Fullscreen (F11)">Fullscreen</button>
+      </header>
+      <div id="toolbar-reveal-zone" class="toolbar-reveal-zone" aria-hidden="true"></div>
+
+      <section id="welcome" class="welcome" aria-live="polite">
+        <h1>Scroll Reader</h1>
+        <p>Drop a CBZ, EPUB, PDF, or TXT book here</p>
+        <button id="welcome-open" type="button">Open a book</button>
+        <p class="hint">Everything stays on this computer.</p>
+      </section>
+
+      <section id="reader" class="reader" aria-label="Book content"></section>
+      <div id="message" class="message" role="status" hidden></div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

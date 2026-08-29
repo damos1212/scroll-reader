@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Scroll Reader
+Comment=Continuous-scroll manga and light novel reader
+Exec=scroll-reader %f
+Icon=scroll-reader
+Terminal=false
+Categories=Graphics;Viewer;
+MimeType=application/vnd.comicbook+zip;application/epub+zip;application/pdf;text/plain;
+StartupNotify=true
+StartupWMClass=scroll-reader

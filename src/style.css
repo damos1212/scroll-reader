@@ -1,0 +1,293 @@
+:root {
+  color: #f2f2f2;
+  background: #000;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  --text-size: 20px;
+  --text-width: 760px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+  background: #000;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-width: 320px;
+  color: #f2f2f2;
+  overscroll-behavior-y: none;
+}
+
+button {
+  min-height: 36px;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 0 13px;
+  color: #f5f5f5;
+  background: #1b1b1b;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  background: #303030;
+  border-color: #777;
+  outline: none;
+}
+
+.toolbar {
+  position: fixed;
+  z-index: 50;
+  top: 12px;
+  left: 50%;
+  display: flex;
+  width: min(calc(100vw - 24px), 980px);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  background: rgb(12 12 12 / 94%);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 55%);
+  transform: translateX(-50%);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.toolbar.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -10px);
+}
+
+.toolbar-reveal-zone {
+  position: fixed;
+  z-index: 49;
+  inset: 0 0 auto;
+  height: 80px;
+}
+
+.toolbar:not(.is-hidden) + .toolbar-reveal-zone {
+  pointer-events: none;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.control-group button {
+  width: 40px;
+  padding: 0;
+}
+
+#font-label {
+  width: 66px;
+  padding: 0 4px;
+  color: #bbb;
+  text-align: center;
+  font-size: 13px;
+}
+
+.book-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: #ddd;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress {
+  min-width: 96px;
+  color: #aaa;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.refresh-rate {
+  color: #777;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.welcome {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.welcome h1 {
+  margin: 0 0 8px;
+  font: 600 clamp(32px, 7vw, 64px) / 1.1 ui-serif, Georgia, serif;
+}
+
+.welcome p {
+  margin: 8px 0 24px;
+  color: #aaa;
+}
+
+.welcome .hint {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.reader {
+  min-height: 100vh;
+}
+
+.reader.cbz-reader {
+  width: 100%;
+}
+
+.reader.cbz-reader.is-preloading {
+  visibility: hidden;
+}
+
+.reader.pdf-reader {
+  width: 100%;
+}
+
+.reader.pdf-reader.is-preloading {
+  visibility: hidden;
+}
+
+.pdf-page-shell {
+  display: flex;
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.pdf-page-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+}
+
+.pdf-reader.pdf-dark .pdf-page-canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.page-shell {
+  display: flex;
+  width: min(100%, 1600px);
+  min-height: min(145vw, 1500px);
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.page-shell img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.page-shell.is-loaded {
+  min-height: 0;
+}
+
+.page-shell.has-error {
+  min-height: 240px;
+  color: #aaa;
+}
+
+.text-reader {
+  width: min(calc(100% - 40px), var(--text-width));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 92px 0 20vh;
+  color: #f2f2f2;
+  font: 400 var(--text-size) / 1.7 ui-serif, Georgia, "Noto Serif", serif;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.epub-reader {
+  width: 100%;
+  min-height: 100vh;
+  background: #000;
+}
+
+.epub-reader.is-preloading {
+  visibility: hidden;
+}
+
+.epub-section-shell,
+.epub-section-frame {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: #000;
+}
+
+.message {
+  position: fixed;
+  z-index: 100;
+  right: 20px;
+  bottom: 20px;
+  max-width: min(460px, calc(100vw - 40px));
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: #191919;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 60%);
+}
+
+body.is-loading {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .toolbar {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .book-title {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  #width-toggle {
+    display: none;
+  }
+}

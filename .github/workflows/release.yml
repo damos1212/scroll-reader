@@ -1,0 +1,95 @@
+name: Package releases
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Linux x64
+            runner: ubuntu-latest
+            command: npm run package:linux
+            artifacts: |
+              release/*.AppImage
+              release/*.tar.gz
+          - platform: macOS universal
+            runner: macos-latest
+            command: npm run package:mac
+            artifacts: |
+              release/*.dmg
+              release/*.zip
+          - platform: Windows x64
+            runner: windows-latest
+            command: npm run package:windows
+            artifacts: release/*.exe
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26.7.0
+          cache: npm
+      - name: Restore dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Run tests
+        run: npm test
+      - name: Package application
+        run: ${{ matrix.command }}
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: scroll-reader-${{ matrix.platform }}
+          path: ${{ matrix.artifacts }}
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify release version
+        shell: bash
+        run: |
+          package_version="$(node -p 'require("./package.json").version')"
+          test "$GITHUB_REF_NAME" = "v$package_version"
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          path: release-assets
+          pattern: scroll-reader-*
+          merge-multiple: true
+      - name: Create checksums
+        working-directory: release-assets
+        run: sha256sum * > SHA256SUMS
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --generate-notes --title "Scroll Reader $GITHUB_REF_NAME"

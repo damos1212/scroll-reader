@@ -1,0 +1,29 @@
+# Dependencies and generated output
+/node_modules/
+/dist/
+/dist-electron/
+/release/
+/.bun/
+/coverage/
+/.vite/
+
+# Accidental root-level generated bundles
+/index-*.js
+
+# Local source artwork; release artwork belongs in packaging/
+/build/*.png
+/build/*.svg
+
+# Logs, caches, and local configuration
+*.log
+*.tsbuildinfo
+.eslintcache
+*.swp
+*~
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
