@@ -32,3 +32,7 @@ Thumbs.db
 /packaging/aur/pkg/
 /packaging/aur/src/
 /packaging/aur/*.pkg.tar.*
+/packaging/aur/scroll-reader-*-linux-x64.tar.gz
+/packaging/aur/scroll-reader.desktop
+/packaging/aur/scroll-reader.png
+/packaging/aur/LICENSE
