@@ -1,8 +1,8 @@
 # Maintainer: damos1212 <353997+damos1212 at users dot noreply dot github dot com>
 
 pkgname=scroll-reader-bin
-pkgver=0.1.0
-pkgrel=2
+pkgver=0.1.1
+pkgrel=1
 pkgdesc='Minimal continuous-scroll reader for CBZ, EPUB, PDF, and TXT files (prebuilt)'
 arch=('x86_64')
 url='https://github.com/damos1212/scroll-reader'
@@ -22,7 +22,7 @@ source=(
   "LICENSE::https://raw.githubusercontent.com/damos1212/scroll-reader/v${pkgver}/LICENSE"
 )
 sha256sums=(
-  '731a311c8b614d0f4399f7f2999a703f81946d40b8a566642f30c5e815d115c9'
+  'ba7cae14781e0d7d3712072902bf4a53fe64add23c508751ad923d4d3853e7dc'
   'd8e6983d706b97e7c5bf0a9fb0a01df79f2de47fc75f7f9f13c9b3fc6c027848'
   'c074bb926a2cfb39c6796905dfc3111a9055afb067a51236bb5b27225811a423'
   'afb80712f3ddbdc0683520b28d751463b06fdc2630943d48ffe393f6cbc7a6f3'
