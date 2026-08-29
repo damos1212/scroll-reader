@@ -1,11 +1,16 @@
 import type { BookManifest, ReaderPreferences, StoredBookState } from "./types";
 
 const PREFS_KEY = "scroll-reader:preferences:v2";
-const DEFAULT_PREFERENCES: ReaderPreferences = { fontSize: 22, textWidth: 760, pdfDark: false };
+const DEFAULT_PREFERENCES: ReaderPreferences = { fontSize: 22, textWidth: 760, pdfDark: false, zoomFactor: 1 };
 const TEXT_WIDTHS = [760, 860, 680] as const;
 
 export function clampFontSize(value: number): number {
   return Math.min(40, Math.max(14, Math.round(value)));
+}
+
+export function clampZoomFactor(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.min(3, Math.max(0.5, Math.round(value * 10) / 10));
 }
 
 export function normalizeTextWidth(value: unknown): number | null {
@@ -28,6 +33,7 @@ export function loadPreferences(storage: Storage = localStorage): ReaderPreferen
       fontSize: typeof stored?.fontSize === "number" ? clampFontSize(stored.fontSize) : null,
       textWidth: normalizeTextWidth(stored?.textWidth),
       pdfDark: stored?.pdfDark === true,
+      zoomFactor: typeof stored?.zoomFactor === "number" ? clampZoomFactor(stored.zoomFactor) : 1,
     };
   } catch {
     return { ...DEFAULT_PREFERENCES };

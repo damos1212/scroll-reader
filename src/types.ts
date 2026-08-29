@@ -31,6 +31,7 @@ export interface ReaderPreferences {
   fontSize: number | null;
   textWidth: number | null;
   pdfDark: boolean;
+  zoomFactor: number;
 }
 
 export interface StoredBookState extends ReadingPosition {

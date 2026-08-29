@@ -105,6 +105,14 @@ button:focus-visible {
   font-size: 13px;
 }
 
+#zoom-reset {
+  min-width: 86px;
+  padding: 0 8px;
+  color: #bbb;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
 .book-title {
   min-width: 0;
   flex: 1;

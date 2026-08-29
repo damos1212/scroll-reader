@@ -14,6 +14,7 @@ import { addPixelBudget, pdfRenderMetrics } from "./pdf-layout";
 import { measureRefreshRate } from "./performance";
 import {
   clampFontSize,
+  clampZoomFactor,
   epubSectionFromCfi,
   loadBookState,
   loadPreferences,
@@ -27,6 +28,7 @@ import type { BookManifest, ReaderPreferences, StoredBookState } from "./types";
 const STANDARD_FONT_SIZE = 22;
 const STANDARD_TEXT_WIDTH = 760;
 const TOOLBAR_REVEAL_HEIGHT = 80;
+const ZOOM_STEP = 0.1;
 const MAX_CBZ_PAGE_PIXELS = 64_000_000;
 const MAX_RETAINED_IMAGE_PIXELS = (8 * 1024 * 1024 * 1024) / 4;
 const MAX_EPUB_SECTIONS = 2_000;
@@ -46,6 +48,7 @@ const titleLabel = requiredElement<HTMLElement>("book-title");
 const progressLabel = requiredElement<HTMLElement>("progress");
 const fontLabel = requiredElement<HTMLButtonElement>("font-label");
 const widthButton = requiredElement<HTMLButtonElement>("width-toggle");
+const zoomResetButton = requiredElement<HTMLButtonElement>("zoom-reset");
 const pdfColorsButton = requiredElement<HTMLButtonElement>("pdf-colors");
 
 let preferences: ReaderPreferences = loadPreferences();
@@ -58,6 +61,8 @@ let saveTimer: number | undefined;
 let toolbarTimer: number | undefined;
 let messageTimer: number | undefined;
 let openGeneration = 0;
+let appliedZoomFactor: number | null = null;
+let lastZoomWheelAt = Number.NEGATIVE_INFINITY;
 
 applyPreferences();
 bindControls();
@@ -80,12 +85,14 @@ function bindControls(): void {
   requiredElement("font-up").addEventListener("click", () => changeFontSize(2));
   fontLabel.addEventListener("click", resetBookFont);
   widthButton.addEventListener("click", cycleTextWidth);
+  zoomResetButton.addEventListener("click", resetZoom);
   pdfColorsButton.addEventListener("click", togglePdfColors);
   requiredElement("fullscreen").addEventListener("click", () => void toggleFullscreen());
 
   window.addEventListener("scroll", handleWindowScroll, { passive: true });
   window.addEventListener("resize", handleWindowResize, { passive: true });
   window.addEventListener("pointermove", handlePointerMove, { passive: true });
+  window.addEventListener("wheel", handleWheel, { passive: false });
   toolbar.addEventListener("pointerenter", () => window.clearTimeout(toolbarTimer));
   toolbar.addEventListener("pointerleave", scheduleToolbarHide);
   toolbarRevealZone.addEventListener("pointerenter", showToolbar);
@@ -621,6 +628,18 @@ function cycleTextWidth(): void {
   applyPreferences();
 }
 
+function changeZoom(delta: number): void {
+  preferences.zoomFactor = clampZoomFactor(preferences.zoomFactor + delta);
+  savePreferences(preferences);
+  applyPreferences();
+}
+
+function resetZoom(): void {
+  preferences.zoomFactor = 1;
+  savePreferences(preferences);
+  applyPreferences();
+}
+
 function togglePdfColors(): void {
   preferences.pdfDark = !preferences.pdfDark;
   savePreferences(preferences);
@@ -634,10 +653,21 @@ function applyPreferences(): void {
   document.documentElement.style.setProperty("--text-width", `${textWidth}px`);
   fontLabel.textContent = preferences.fontSize === null && currentBook?.kind === "epub" ? "Book font" : `${fontSize} px`;
   widthButton.textContent = preferences.textWidth === null && currentBook?.kind === "epub" ? "Book width" : `Width ${textWidth}`;
+  zoomResetButton.textContent = `Zoom ${Math.round(preferences.zoomFactor * 100)}%`;
+  zoomResetButton.disabled = preferences.zoomFactor === 1;
   pdfColorsButton.hidden = currentBook?.kind !== "pdf";
   pdfColorsButton.textContent = preferences.pdfDark ? "PDF: dark" : "PDF: light";
   pdfColorsButton.setAttribute("aria-pressed", String(preferences.pdfDark));
   reader.classList.toggle("pdf-dark", currentBook?.kind === "pdf" && preferences.pdfDark);
+  if (appliedZoomFactor !== preferences.zoomFactor) {
+    appliedZoomFactor = preferences.zoomFactor;
+    void window.readerApi.setZoomFactor(preferences.zoomFactor).then(() => {
+      requestAnimationFrame(handleWindowResize);
+    }, (error: unknown) => {
+      appliedZoomFactor = null;
+      showMessage(error instanceof Error ? error.message : String(error), 6000);
+    });
+  }
   if (currentBook?.kind === "epub") refreshEpubFrames();
   if (currentBook?.kind === "txt") requestAnimationFrame(setTextPageCount);
 }
@@ -661,6 +691,15 @@ function handleKeydown(event: KeyboardEvent): void {
   } else if (event.key === "Home") {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+}
+
+function handleWheel(event: WheelEvent): void {
+  if (!(event.ctrlKey || event.metaKey) || event.deltaY === 0) return;
+  event.preventDefault();
+  showToolbar();
+  if (event.timeStamp - lastZoomWheelAt < 80) return;
+  lastZoomWheelAt = event.timeStamp;
+  changeZoom(event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
 }
 
 function showToolbar(): void {

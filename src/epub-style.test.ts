@@ -4,21 +4,21 @@ import { epubDocumentCss, securedEpubMarkup } from "./epub-style";
 
 describe("EPUB document styling", () => {
   it("preserves publisher typography and width in book-style mode", () => {
-    const css = epubDocumentCss({ fontSize: null, textWidth: null, pdfDark: false });
+    const css = epubDocumentCss({ fontSize: null, textWidth: null, pdfDark: false, zoomFactor: 1 });
     expect(css).not.toContain("font-family");
     expect(css).not.toMatch(/body\{[^}]*font-size:/);
     expect(css).not.toMatch(/body\{[^}]*max-width:/);
   });
 
   it("adds only the requested font-size override", () => {
-    const css = epubDocumentCss({ fontSize: 22, textWidth: null, pdfDark: false });
+    const css = epubDocumentCss({ fontSize: 22, textWidth: null, pdfDark: false, zoomFactor: 1 });
     expect(css).toContain("font-size:22px !important");
     expect(css).not.toContain("font-family");
     expect(css).not.toMatch(/body\{[^}]*max-width:/);
   });
 
   it("adds the selected readable-width override", () => {
-    const css = epubDocumentCss({ fontSize: null, textWidth: 760, pdfDark: false });
+    const css = epubDocumentCss({ fontSize: null, textWidth: 760, pdfDark: false, zoomFactor: 1 });
     expect(css).toContain("max-width:760px !important");
     expect(css).toContain("margin-left:auto !important");
   });

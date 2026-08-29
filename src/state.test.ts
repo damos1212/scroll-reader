@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   bookStateKey,
   clampFontSize,
+  clampZoomFactor,
   epubSectionFromCfi,
   loadBookState,
   loadPreferences,
@@ -28,6 +29,13 @@ describe("reader state", () => {
     expect(clampFontSize(100)).toBe(40);
   });
 
+  it("clamps zoom to 10 percent steps between 50 and 300 percent", () => {
+    expect(clampZoomFactor(0.2)).toBe(0.5);
+    expect(clampZoomFactor(1.26)).toBe(1.3);
+    expect(clampZoomFactor(4)).toBe(3);
+    expect(clampZoomFactor(Number.NaN)).toBe(1);
+  });
+
   it("cycles the supported text widths", () => {
     expect(nextTextWidth(null)).toBe(760);
     expect(nextTextWidth(760)).toBe(860);
@@ -36,19 +44,27 @@ describe("reader state", () => {
   });
 
   it("uses the standard text settings when no preferences are saved", () => {
-    expect(loadPreferences(new MemoryStorage())).toEqual({ fontSize: 22, textWidth: 760, pdfDark: false });
+    expect(loadPreferences(new MemoryStorage())).toEqual({ fontSize: 22, textWidth: 760, pdfDark: false, zoomFactor: 1 });
   });
 
   it("falls back when preferences are malformed", () => {
     const storage = new MemoryStorage();
     storage.setItem("scroll-reader:preferences:v2", "not-json");
-    expect(loadPreferences(storage)).toEqual({ fontSize: 22, textWidth: 760, pdfDark: false });
+    expect(loadPreferences(storage)).toEqual({ fontSize: 22, textWidth: 760, pdfDark: false, zoomFactor: 1 });
   });
 
   it("loads a persisted PDF color preference", () => {
     const storage = new MemoryStorage();
     storage.setItem("scroll-reader:preferences:v2", JSON.stringify({ fontSize: null, textWidth: null, pdfDark: true }));
     expect(loadPreferences(storage).pdfDark).toBe(true);
+  });
+
+  it("loads persisted zoom and defaults legacy preferences to 100 percent", () => {
+    const storage = new MemoryStorage();
+    storage.setItem("scroll-reader:preferences:v2", JSON.stringify({ zoomFactor: 1.6 }));
+    expect(loadPreferences(storage).zoomFactor).toBe(1.6);
+    storage.setItem("scroll-reader:preferences:v2", JSON.stringify({ fontSize: 22 }));
+    expect(loadPreferences(storage).zoomFactor).toBe(1);
   });
 
   it("keys saved positions by content hash, independent of file path", () => {

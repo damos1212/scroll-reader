@@ -82,11 +82,12 @@ npm run start
 ## Controls
 
 - `Ctrl+O`: open a book
+- `Ctrl` + mouse wheel: zoom in or out
 - `+` or `-`: change reflowable text size
 - `F11`: toggle fullscreen
 - `Home`: scroll to the beginning
 
-Move the pointer into the top 80 pixels of the window to reveal the toolbar. Use the font label and width button to return EPUB content to its publisher settings.
+Move the pointer into the top 80 pixels of the window to reveal the toolbar. Select the zoom percentage to return to 100%. Use the font label and width button to return EPUB content to its publisher settings.
 
 ## Verification
 
