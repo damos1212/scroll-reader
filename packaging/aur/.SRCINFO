@@ -1,7 +1,7 @@
 pkgbase = scroll-reader-bin
 	pkgdesc = Minimal continuous-scroll reader for CBZ, EPUB, PDF, and TXT files (prebuilt)
 	pkgver = 0.1.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/damos1212/scroll-reader
 	arch = x86_64
 	license = MIT

@@ -2,7 +2,7 @@
 
 pkgname=scroll-reader-bin
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Minimal continuous-scroll reader for CBZ, EPUB, PDF, and TXT files (prebuilt)'
 arch=('x86_64')
 url='https://github.com/damos1212/scroll-reader'
@@ -46,4 +46,6 @@ package() {
     "${pkgdir}/usr/share/icons/hicolor/1024x1024/apps/scroll-reader.png"
   install -Dm644 "${srcdir}/LICENSE" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+
+  chown -R root:root "${pkgdir}"
 }
